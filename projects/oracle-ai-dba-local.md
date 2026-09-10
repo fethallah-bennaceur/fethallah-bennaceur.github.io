@@ -6,8 +6,8 @@ description: "Agent IA local spécialisé dans le diagnostic Oracle 19c RAC fond
 
 # Oracle AI DBA local
 
-**Projet personnel — août 2026**  
-**Statut : prototype fonctionnel avancé — 318 tests automatisés validés**
+**Projet personnel — état mis à jour en septembre 2026**  
+**Statut : prototype fonctionnel avancé — dernière baseline complète : 318 tests réussis**
 
 ## Présentation
 
@@ -19,8 +19,10 @@ collecte d'abord des preuves techniques vérifiables, les structure, puis utilis
 modèle local pour établir un diagnostic DBA argumenté.
 
 Le système fonctionne sur une machine virtuelle **Oracle Linux 8.10**. Le traitement
-reste local grâce à **Ollama** et **GPT-OSS 20B**, sans envoyer les données Oracle à un
-service d'IA externe.
+reste local grâce à **Ollama** et au modèle **Qwen** actuellement retenu après les essais
+comparatifs du projet, sans envoyer les données Oracle à un service d'IA externe. Le tag
+Ollama et la variante Qwen exacts restent à recopier depuis la configuration effective de
+la VM.
 
 ## Principe d'architecture
 
@@ -28,12 +30,12 @@ service d'IA externe.
 |---|---|
 | Interface Web | Saisie des demandes, suivi progressif et reprise des conversations |
 | FastAPI / Python | API, orchestration, streaming et contrôle du runtime |
-| Routeurs d'intention et de Skills | Sélection de la méthode DBA et des outils adaptés |
+| LLM et navigation dans les Skills | Compréhension de la demande, choix de la méthode DBA, des Skills et des outils |
 | Outils Oracle en lecture seule | Collecte SQL, sessions, performances et informations RAC |
 | SQLcl | Accès Oracle privilégié pour les requêtes contrôlées |
-| ADR, alert logs et traces | Collecte et analyse des éléments de diagnostic Oracle |
+| ADR, alert logs et traces | Collecte factuelle des éléments de diagnostic Oracle |
 | Evidence Engine / Evidence Store | Conservation, pagination et réutilisation des preuves volumineuses |
-| GPT-OSS 20B via Ollama | Corrélation, raisonnement et formulation du diagnostic |
+| Qwen via Ollama | Corrélation, raisonnement DBA et formulation du diagnostic |
 
 ## Réalisations principales
 
@@ -49,8 +51,8 @@ service d'IA externe.
 
 - Boucle complète : question, sélection d'outil, collecte, réinjection des résultats et
   réponse finale.
-- Le modèle joue le rôle de moteur de décision, tandis que les outils déterministes
-  fournissent les mesures.
+- Le modèle joue le rôle de moteur de compréhension, de décision et de raisonnement DBA,
+  tandis que Python orchestre les échanges et que les outils fournissent les preuves.
 - Journal technique des appels d'outils pour faciliter l'audit et le diagnostic.
 - Transport adaptatif des résultats selon leur taille.
 - Continuation multi-contexte pour les investigations dépassant une seule fenêtre de
@@ -62,7 +64,8 @@ service d'IA externe.
 - Outils dédiés aux sessions, blocages, performances SQL et environnement RAC.
 - Lecture contrôlée des alert logs, traces et fichiers ADR.
 - Accès Linux/SSH limité aux sources nécessaires au diagnostic.
-- Recherche et analyse d'erreurs Oracle à partir de sources documentaires autorisées.
+- Recherche d'erreurs Oracle à partir de sources documentaires autorisées, puis analyse
+  par le modèle.
 - Corrélation de plusieurs sources : données runtime, alert logs, traces et contexte
   documentaire.
 
@@ -74,6 +77,39 @@ service d'IA externe.
 - Ajout de Skills locaux spécialisés dans l'analyse des alert logs.
 - Chargement progressif : seuls les Skills pertinents sont injectés dans le contexte.
 - Découverte dynamique des articles spécialisés et navigation dans leurs références.
+
+### Alert logs, ADR et Skills de diagnostic Oracle
+
+- Création du Skill local principal `alert-log-analysis/SKILL.md`, séparé des Skills
+  Oracle officiels et chargé uniquement pour les incidents concernés.
+- Diagnostic des événements Oracle Database, ASM, ACFS et Clusterware dans un
+  environnement Oracle 19c Extended RAC.
+- Analyse fondée sur les alert logs et traces ADR réellement collectés, avec règles
+  strictes de grounding : aucun événement, incident ou lien de causalité n'est inventé.
+- Organisation en **7 références spécialisées**, chargées progressivement :
+  - erreurs Oracle et incidents ADR ;
+  - redo, log switches et checkpoints ;
+  - archivage et Fast Recovery Area ;
+  - cycle de vie des instances ;
+  - processus Oracle d'arrière-plan ;
+  - événements RAC étendus : GCS/GES, évictions, interconnexion et quorum ;
+  - ASM et événements de stockage.
+- Routage « Route, Don't Flood » : le Skill principal sélectionne uniquement la
+  référence utile au lieu de charger toute la documentation dans le contexte.
+- Validation réelle du routage jusqu'à une référence spécialisée, avec chargement du
+  routeur et de l'article ciblé confirmé.
+
+### Diagnostic système Linux et Skill système
+
+- Création et intégration du Skill local `linux-system-analysis/SKILL.md`.
+- Collecte contrôlée des indicateurs système avec `top`, `vmstat` et `df`.
+- Analyse CPU, load average, run queue, mémoire, swap, I/O wait et systèmes de
+  fichiers.
+- Mise en relation des symptômes Linux avec les preuves Oracle, sans confondre
+  corrélation temporelle et cause démontrée.
+- Commandes limitées à une liste d'opérations de diagnostic en lecture seule.
+- Validation du Skill dans le catalogue, de son routage GPT et des collectes système
+  réelles.
 
 ### Gestion des preuves
 
@@ -89,11 +125,14 @@ service d'IA externe.
 - Distinction explicite entre faits, interprétations, hypothèses et éléments à vérifier.
 - Lecture seule par défaut ; aucune réparation automatique de la base ou du système.
 - Garde SQL et contrôle des opérations potentiellement dangereuses.
-- Validation explicite pour les fonctions dépendant de licences Oracle particulières.
+- Contrôles fondamentaux des fonctions dépendant de licences Oracle particulières ;
+  l'audit exhaustif de tous les usages reste en cours.
 - MCP désactivé par défaut : les outils DBA spécialisés restent prioritaires.
 - Aucune invention autorisée de Bug ID, note MOS, patch, SQL_ID ou preuve runtime.
 
 ## Validation
+
+### Dernière baseline entièrement démontrée sur la VM
 
 La dernière baseline complète documentée comprend :
 
@@ -103,22 +142,76 @@ La dernière baseline complète documentée comprend :
 - modèle Ollama opérationnel ;
 - 163 ressources Skills détectées ;
 - Evidence Store, transport adaptatif et continuation multi-contexte testés.
+- routage du Skill `alert-log-analysis` et d'une référence spécialisée validé ;
+- Skill `linux-system-analysis` et collectes `top`, `vmstat`, `df` validés en lecture
+  seule.
 
 Les tests couvrent notamment le routage, les politiques de sécurité, les outils Oracle,
 le stockage des preuves, la pagination, les conversations et le runtime agentique.
 
+### Correctif préparé mais pas encore intégré à la baseline officielle
+
+Le correctif `oracle-ai-dba-skill-evidence-completion-fix.patch` impose la lecture
+intégrale d'un Skill externalisé jusqu'à `complete=true` avant d'autoriser un outil métier
+ou une réponse finale. Il a passé **39 tests ciblés localement**, mais son application, la
+suite complète et le test runtime sur la VM ne sont pas encore démontrés. Il n'est donc
+pas comptabilisé dans la baseline officielle de 318 tests.
+
 ## Compétences démontrées
 
 `Oracle 19c RAC` · `DBA Oracle` · `Python` · `FastAPI` · `SQLcl` · `Linux` ·
-`Ollama` · `GPT-OSS` · `IA agentique` · `SSE` · `SSH/SFTP` · `ADR` ·
-`Tests automatisés` · `Sécurité read-only` · `Architecture logicielle`
+`Ollama` · `Qwen` · `IA agentique` · `SSE` · `SSH/SFTP` · `ADR` ·
+`Alert logs` · `ADR` · `Diagnostic Linux` · `Tests automatisés` ·
+`Sécurité read-only` · `Architecture logicielle`
 
-## Prochaines évolutions
+## État actuel et travail restant
 
-- Finaliser la lecture obligatoire et complète des Skills volumineux.
-- Terminer l'audit global des fonctions Oracle soumises à licences ou restrictions.
-- Renforcer les évaluations de qualité et la couverture des diagnostics RAC complexes.
-- Consolider la version stable, l'observabilité et la documentation d'exploitation.
+### Déjà réalisé et validé
+
+- Fondations fonctionnelles de l'application, de l'interface et du runtime agentique.
+- Saisie longue, streaming SSE, affichage progressif et annulation serveur.
+- Persistance et reprise des conversations.
+- Exécution Oracle en lecture seule via SQLcl et outils de diagnostic Oracle/Linux.
+- Chargement progressif des Skills Oracle et locaux, routage vers un article spécialisé
+  et découverte dynamique des chemins réels.
+- Evidence Store lossless, pagination adaptative, prévention des relectures et
+  continuation multi-contexte.
+- Dernière suite complète démontrée : **318 tests réussis, 2 avertissements**.
+- Environnement Oracle RAC validé : base `ORCL`, instances `ORCL1` et `ORCL2`.
+- Health check applicatif observé sur la connexion à `ORCL1` : application, Oracle,
+  Ollama et 163 ressources Skills opérationnels ; MCP désactivé. Ce health check confirme
+  l'instance utilisée par la connexion, mais ne constitue pas l'inventaire complet des
+  instances RAC.
+
+### Étape actuellement en cours
+
+Le projet se trouve dans la phase d'amélioration de la **qualité et de la fiabilité des
+réponses**. Le travail immédiat concerne la complétude obligatoire des Skills
+externalisés.
+
+### Prochaine action exacte
+
+Appliquer sur la VM le correctif de complétude des Skills, puis obtenir les quatre preuves
+suivantes :
+
+1. application du patch sans erreur ni fuzz ;
+2. réussite des tests ciblés sur la VM ;
+3. réussite de la suite complète ;
+4. test runtime montrant toutes les lectures jusqu'à `complete=true` avant tout outil
+   métier ou toute réponse finale.
+
+### Après cette validation
+
+- Exécuter les scénarios de référence : erreurs ORA, alert logs ORCL1/ORCL2, performance
+  SQL, RAC/ASM et diagnostic Linux.
+- Vérifier la complétude des preuves, la couverture multi-instance et la séparation entre
+  faits, hypothèses et recommandations.
+- Terminer l'audit exhaustif des `DBMS_*`, des licences Oracle et des autorisations
+  d'actions modifiantes.
+- Récupérer une archive complète correspondant exactement au code installé sur la VM et
+  confirmer le tag Qwen actif.
+- Consolider la documentation, corriger ou documenter les deux avertissements FastAPI,
+  puis figer une version Git stable de la V1.
 
 ## Positionnement
 
