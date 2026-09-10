@@ -144,6 +144,54 @@
       margin-top: 0;
     }
 
+    .project-card {
+      border-left: 5px solid var(--primary);
+      background: #f8fbfd;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .project-meta {
+      color: var(--muted);
+      font-weight: bold;
+      margin: 4px 0 14px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .metric {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--primary);
+      font-size: 1.25rem;
+    }
+
+    details {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+
+    summary {
+      color: var(--primary-dark);
+      cursor: pointer;
+      font-weight: bold;
+    }
+
     ul {
       padding-left: 22px;
     }
@@ -186,6 +234,7 @@
   <nav>
     <a href="#profil">Profil</a>
     <a href="#competences">Compétences</a>
+    <a href="#projets">Projets</a>
     <a href="#experiences">Expériences</a>
     <a href="#notes">Notes techniques</a>
     <a href="#contact">Contact</a>
@@ -229,6 +278,79 @@
         <span class="tag">HPE Primera</span>
         <span class="tag">ITIL v3</span>
       </div>
+    </section>
+
+    <section id="projets">
+      <h2>Projets techniques</h2>
+
+      <article class="project-card">
+        <h3>Oracle AI DBA local</h3>
+        <p class="project-meta">Projet personnel | Août 2026 | Prototype fonctionnel avancé</p>
+
+        <p>
+          Conception et développement d’un agent d’intelligence artificielle local
+          spécialisé dans l’administration et le diagnostic des bases Oracle 19c RAC.
+          L’agent collecte d’abord des preuves techniques vérifiables, puis utilise un
+          modèle local pour produire un diagnostic DBA argumenté.
+        </p>
+
+        <div class="metrics">
+          <div class="metric"><strong>318</strong>tests validés</div>
+          <div class="metric"><strong>163</strong>Oracle Skills</div>
+          <div class="metric"><strong>Local</strong>données protégées</div>
+          <div class="metric"><strong>Read-only</strong>par défaut</div>
+        </div>
+
+        <div>
+          <span class="tag">Oracle 19c RAC</span>
+          <span class="tag">Python</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">SQLcl</span>
+          <span class="tag">Ollama</span>
+          <span class="tag">GPT-OSS 20B</span>
+          <span class="tag">IA agentique</span>
+          <span class="tag">Linux</span>
+        </div>
+
+        <details>
+          <summary>Fonctionnalités réalisées</summary>
+          <ul>
+            <li>Interface Web avec streaming SSE, annulation et reprise des conversations.</li>
+            <li>Runtime agentique complet : question, sélection des outils, collecte des preuves et réponse.</li>
+            <li>Accès Oracle contrôlé en lecture seule via SQLcl.</li>
+            <li>Analyse des sessions, blocages, performances SQL et environnements RAC.</li>
+            <li>Lecture contrôlée des alert logs, traces et fichiers ADR.</li>
+            <li>Intégration de 163 Oracle Skills et de Skills locaux spécialisés.</li>
+            <li>Evidence Store avec SHA-256, pagination, offsets et conservation des résultats volumineux.</li>
+            <li>Transport adaptatif, continuation multi-contexte et journalisation des outils.</li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>Sécurité et fiabilité</summary>
+          <ul>
+            <li>Principe « Evidence First — Reasoning Second ».</li>
+            <li>Séparation entre faits, interprétations, hypothèses et éléments à vérifier.</li>
+            <li>Aucune réparation automatique de la base ou du système.</li>
+            <li>Gardes SQL, contrôles d’autorisation et validation des fonctions soumises à licence.</li>
+            <li>Aucune donnée Oracle envoyée à un service d’IA externe.</li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>Prochaines évolutions</summary>
+          <ul>
+            <li>Finaliser la lecture complète des Skills volumineux.</li>
+            <li>Terminer l’audit global des licences et restrictions Oracle.</li>
+            <li>Renforcer les évaluations et les diagnostics RAC complexes.</li>
+            <li>Consolider la version stable et l’observabilité.</li>
+          </ul>
+        </details>
+
+        <p>
+          <a class="button" href="projects/oracle-ai-dba-local.html">Voir la fiche détaillée</a>
+        </p>
+      </article>
     </section>
 
     <section id="experiences">
