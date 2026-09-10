@@ -295,8 +295,10 @@
         </p>
 
         <div class="metrics">
-          <div class="metric"><strong>318</strong>tests validés</div>
-          <div class="metric"><strong>163</strong>Oracle Skills</div>
+          <div class="metric"><strong>318</strong>tests réussis</div>
+          <div class="metric"><strong>163</strong>ressources Oracle Skills</div>
+          <div class="metric"><strong>2</strong>Skills locaux spécialisés</div>
+          <div class="metric"><strong>7</strong>références alert logs</div>
           <div class="metric"><strong>Local</strong>données protégées</div>
           <div class="metric"><strong>Read-only</strong>par défaut</div>
         </div>
@@ -327,6 +329,67 @@
             <li>Evidence Store avec SHA-256, pagination, offsets et conservation des résultats volumineux.</li>
             <li>Transport adaptatif, continuation multi-contexte et journalisation des outils.</li>
           </ul>
+        </details>
+
+        <details>
+          <summary>163 ressources Oracle Skills et Skills locaux spécialisés</summary>
+          <p>
+            Le projet utilise le référentiel officiel Oracle Skills comme base de
+            connaissances pour la partie Database. Les <strong>163 ressources</strong>
+            détectées couvrent notamment l’administration, l’architecture, la
+            sauvegarde et la restauration, le monitoring, la performance, la sécurité,
+            SQL, PL/SQL, SQLcl, les migrations, les conteneurs et le développement.
+          </p>
+          <ul>
+            <li>
+              Navigation hiérarchique « Route, Don’t Flood » : le modèle charge d’abord
+              le routeur, puis uniquement la catégorie et l’article nécessaires.
+            </li>
+            <li>
+              Découverte dynamique des fichiers réels avec
+              <code>list_skill_files</code>, sans demander au modèle d’inventer un chemin.
+            </li>
+            <li>
+              Skill local <code>alert-log-analysis</code> avec 7 références spécialisées :
+              erreurs ORA et incidents ADR, redo/checkpoints, archivage/FRA, cycle de vie
+              des instances, processus d’arrière-plan, RAC étendu et ASM/stockage.
+            </li>
+            <li>
+              Skill local <code>linux-system-analysis</code> pour corréler les indicateurs
+              CPU, charge, mémoire, swap, I/O wait et systèmes de fichiers avec les
+              preuves Oracle.
+            </li>
+            <li>
+              Les Skills fournissent la connaissance et la méthode ; les résultats SQL,
+              alert logs, traces ADR et mesures Linux restent les preuves runtime.
+            </li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>Validation : 318 tests réussis et couverture actuelle</summary>
+          <p>
+            La dernière suite complète démontrée sur la VM a produit
+            <strong>318 tests réussis et 2 avertissements</strong>, sans échec. Les deux
+            avertissements concernent l’API FastAPI <code>on_event</code> devenue
+            dépréciée ; ils n’empêchent pas le fonctionnement du service.
+          </p>
+          <ul>
+            <li>API FastAPI, streaming SSE, saisie longue et annulation serveur.</li>
+            <li>Persistance, historique et reprise des conversations.</li>
+            <li>Boucle agentique, appels d’outils et réinjection des résultats.</li>
+            <li>Chargement, routage et découverte dynamique des Skills.</li>
+            <li>Exécution SQLcl en lecture seule, gardes SQL et autorisations.</li>
+            <li>Outils Oracle, RAC, ADR, alert logs, traces et diagnostic Linux.</li>
+            <li>Evidence Store, SHA-256, pagination et transport adaptatif.</li>
+            <li>Continuation multi-contexte et protection contre les relectures.</li>
+          </ul>
+          <p>
+            Un correctif supplémentaire imposant la lecture intégrale d’un Skill
+            externalisé jusqu’à <code>complete=true</code> a passé
+            <strong>39 tests ciblés localement</strong>. Il reste à l’appliquer et à le
+            valider sur la VM avant de l’intégrer à la baseline officielle.
+          </p>
         </details>
 
         <details>
